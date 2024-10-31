@@ -1,0 +1,36 @@
+{
+	"name": "@contentstech/stackflow-plugin-omniflow",
+	"type": "module",
+	"version": "0.0.0",
+	"description": "Fine-tune UX of Stackflow apps across multiple environments",
+	"author": "XiNiHa <me@xiniha.dev>",
+	"scripts": {
+		"build": "tsc && node esbuild.config.js"
+	},
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"peerDependencies": {
+		"@contentstech/stackflow-solid": ">=0.3.0",
+		"@stackflow/config": "^1.0.1",
+		"@stackflow/core": "^1.1.0",
+		"solid-js": ">=1.4.0"
+	},
+	"dependencies": {
+		"seroval": "^1.1.1"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@stackflow/config": "^1.2.0",
+		"@stackflow/core": "^1.1.0",
+		"esbuild": "^0.24.0",
+		"esbuild-plugin-solid": "^0.6.0",
+		"solid-js": "^1.9.2",
+		"typescript": "^5.6.3"
+	},
+	"license": "MIT",
+	"packageManager": "pnpm@9.12.3+sha512.cce0f9de9c5a7c95bef944169cc5dfe8741abfb145078c0d508b868056848a87c81e626246cb60967cbd7fd29a6c062ef73ff840d96b3c86c40ac92cf4a813ee"
+}

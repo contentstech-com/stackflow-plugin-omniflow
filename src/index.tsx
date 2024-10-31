@@ -71,34 +71,6 @@ export function omniflow<ActivityName extends string>({
 			}
 			return initialEvents;
 		},
-		onInit({ actions }) {
-			const topActivity = actions
-				.getStack()
-				.activities.findLast((a) => a.isTop);
-			if (topActivity?.params.OMNI_childName) {
-				actions.stepPush({
-					stepId: id(),
-					stepParams: {
-						OMNI_childName: topActivity.params.OMNI_childName,
-						OMNI_childParams: topActivity.params.OMNI_childParams,
-					},
-				});
-			}
-		},
-		onPushed({ actions, effect }) {
-			const envOptions = getEnvOptions(effect.activity.name);
-			if (envOptions?.subview.initialActivity) {
-				actions.stepPush({
-					stepId: id(),
-					stepParams: {
-						OMNI_childName: envOptions.subview.initialActivity,
-						OMNI_childParams: serialize(envOptions.subview.initialParams, {
-							plugins: serovalPlugins,
-						}),
-					},
-				});
-			}
-		},
 		onBeforePush({ actions, actionParams }) {
 			const topActivity = actions.getStack().activities.find((a) => a.isTop);
 			if (!topActivity) return;
@@ -120,7 +92,17 @@ export function omniflow<ActivityName extends string>({
 						}),
 					},
 				});
-				return;
+			} else if (envOptions.subview.initialParams) {
+				actions.overrideActionParams({
+					...actionParams,
+					activityParams: {
+						...actionParams.activityParams,
+						OMNI_childName: envOptions.subview.initialActivity,
+						OMNI_childParams: serialize(envOptions.subview.initialParams, {
+							plugins: serovalPlugins,
+						}),
+					},
+				});
 			}
 		},
 		onBeforePop({ actions }) {
@@ -137,6 +119,7 @@ export function omniflow<ActivityName extends string>({
 					s.enteredBy.name.startsWith("Step") &&
 					s.params.OMNI_childName !== activeChildName,
 			);
+			if (indexToTarget === -1) return actions.stepPop();
 			for (let i = topActivity.steps.length - 1; i > indexToTarget; i--) {
 				actions.stepPop();
 			}

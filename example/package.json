@@ -8,7 +8,7 @@
 		"start": "vinxi start"
 	},
 	"dependencies": {
-		"@contentstech/stackflow-plugin-omniflow": "workspace:^",
+		"@contentstech/stackflow-plugin-omniflow": "../",
 		"@contentstech/stackflow-plugin-renderer-basic": "^0.5.0",
 		"@contentstech/stackflow-solid": "^0.5.0",
 		"@solidjs/start": "^1.0.9",

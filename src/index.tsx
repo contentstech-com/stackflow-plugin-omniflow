@@ -11,7 +11,7 @@ import { id } from "@stackflow/core";
 import { type Plugin as SerovalPlugin, deserialize, serialize } from "seroval";
 import { createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
-import { ChildProvider } from "./child";
+import { ChildProvider } from "./child.js";
 
 type OmniflowOptions<ActivityName extends string> = {
 	config: Config<ActivityDefinition<ActivityName>>;
@@ -174,4 +174,4 @@ export function omniflow<ActivityName extends string>({
 	});
 }
 
-export { useChild } from "./child";
+export { useChild } from "./child.js";

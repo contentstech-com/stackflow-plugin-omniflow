@@ -6,7 +6,7 @@ import {
 	useStack,
 } from "@contentstech/stackflow-solid/future";
 import type { RegisteredActivityName } from "@stackflow/config";
-import type { JSXElement } from "solid-js";
+import { Show, type JSXElement } from "solid-js";
 import { unwrap } from "solid-js/store";
 import config from "./config";
 
@@ -54,10 +54,12 @@ const components: Record<
 					>
 						Push Root
 					</button>
-					<div class="border rounded p-2">
-						<p>Child will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.()}</div>
-					</div>
+					<Show when={child}>
+						<div class="border rounded p-2">
+							<p>Child will be rendered here</p>
+							<div class="border border-red p-2 rounded">{child?.()}</div>
+						</div>
+					</Show>
 				</div>
 				<div class="min-h-0 h-full overflow-auto flex-1">
 					<pre>{JSON.stringify(unwrap(stack().activities), null, 2)}</pre>
@@ -100,7 +102,7 @@ export const { Stack, actions, stepActions } = stackflow({
 	components,
 	plugins: [
 		basicRendererPlugin(),
-		omniflow({ config, components, environment: "desktop" }),
+		omniflow({ config, components, environment: "mobile" }),
 		() => ({
 			key: "wrap-screen",
 			wrapActivity: ({ activity }) => <Screen>{activity.render()}</Screen>,

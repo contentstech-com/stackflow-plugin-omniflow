@@ -7,7 +7,7 @@ import type {
 	ActivityDefinition,
 	Config,
 } from "@stackflow/config";
-import { id, makeEvent } from "@stackflow/core";
+import { id } from "@stackflow/core";
 import { type Plugin as SerovalPlugin, deserialize, serialize } from "seroval";
 import { createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
@@ -142,6 +142,11 @@ export function omniflow<ActivityName extends string>({
 			}
 		},
 		wrapActivity({ activity }) {
+			const envOptions = getEnvOptions(activity.name);
+			if (!envOptions || envOptions.subview.children.length === 0) {
+				return activity.render();
+			}
+
 			const child = createMemo(
 				() =>
 					components[activity.params.OMNI_childName as ActivityName] as

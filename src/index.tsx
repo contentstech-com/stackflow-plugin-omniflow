@@ -76,7 +76,7 @@ export function omniflow<ActivityName extends string>({
 			if (topActivity) {
 				const topEnvOptions = getEnvOptions(topActivity.name);
 				if (
-					(topEnvOptions?.subview.children as string[]).includes(
+					(topEnvOptions?.subview.children as string[] | undefined)?.includes(
 						actionParams.activityName,
 					)
 				) {

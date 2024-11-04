@@ -170,19 +170,14 @@ export function omniflow<ActivityName extends string>({
 				return activity.render();
 			}
 
-			const child = createMemo(
-				() =>
-					components[activity.params.OMNI_childName as ActivityName] as
-						| ActivityComponentType<ActivityName>
-						| undefined,
-			);
-			const childParamsSerialized = createMemo(
-				() => activity.params.OMNI_childParams,
-			);
-			const childParams = createMemo(() => {
-				const v = childParamsSerialized();
+			const child = () =>
+				components[activity.params.OMNI_childName as ActivityName] as
+					| ActivityComponentType<ActivityName>
+					| undefined;
+			const childParams = () => {
+				const v = activity.params.OMNI_childParams;
 				return v != null ? deserialize<ActivityBaseParams>(v) : undefined;
-			});
+			};
 
 			return (
 				<ChildProvider

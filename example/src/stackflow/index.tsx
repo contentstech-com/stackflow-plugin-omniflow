@@ -6,7 +6,7 @@ import {
 	useStack,
 } from "@contentstech/stackflow-solid/future";
 import type { RegisteredActivityName } from "@stackflow/config";
-import { Show, type JSXElement } from "solid-js";
+import { type JSXElement, Show } from "solid-js";
 import { unwrap } from "solid-js/store";
 import config from "./config";
 

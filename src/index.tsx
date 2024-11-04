@@ -73,32 +73,72 @@ export function omniflow<ActivityName extends string>({
 		},
 		onBeforePush({ actions, actionParams }) {
 			const topActivity = actions.getStack().activities.find((a) => a.isTop);
-			if (!topActivity) return;
-			const envOptions = getEnvOptions(topActivity.name);
-			if (!envOptions) return;
+			if (topActivity) {
+				const topEnvOptions = getEnvOptions(topActivity.name);
+				if (
+					(topEnvOptions?.subview.children as string[]).includes(
+						actionParams.activityName,
+					)
+				) {
+					actions.preventDefault();
+					actions.stepPush({
+						stepId: id(),
+						stepParams: {
+							OMNI_childName: actionParams.activityName,
+							OMNI_childParams: serialize(actionParams.activityParams, {
+								plugins: serovalPlugins,
+							}),
+						},
+					});
+					return;
+				}
+			}
 
-			if (
-				(envOptions.subview.children as string[]).includes(
-					actionParams.activityName,
-				)
-			) {
-				actions.preventDefault();
-				actions.stepPush({
-					stepId: id(),
-					stepParams: {
-						OMNI_childName: actionParams.activityName,
-						OMNI_childParams: serialize(actionParams.activityParams, {
-							plugins: serovalPlugins,
-						}),
-					},
-				});
-			} else if (envOptions.subview.initialParams) {
+			const nextEnvOptions = getEnvOptions(actionParams.activityName);
+			if (nextEnvOptions?.subview.initialParams) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						OMNI_childName: envOptions.subview.initialActivity,
-						OMNI_childParams: serialize(envOptions.subview.initialParams, {
+						OMNI_childName: nextEnvOptions.subview.initialActivity,
+						OMNI_childParams: serialize(nextEnvOptions.subview.initialParams, {
+							plugins: serovalPlugins,
+						}),
+					},
+				});
+			}
+		},
+		onBeforeReplace({ actions, actionParams }) {
+			const topActivity = actions.getStack().activities.find((a) => a.isTop);
+			if (topActivity) {
+				const topEnvOptions = getEnvOptions(topActivity.name);
+				if (
+					(topEnvOptions?.subview.children as string[]).includes(
+						actionParams.activityName,
+					)
+				) {
+					actions.preventDefault();
+					actions.stepReplace({
+						stepId: id(),
+						stepParams: {
+							OMNI_childName: actionParams.activityName,
+							OMNI_childParams: serialize(actionParams.activityParams, {
+								plugins: serovalPlugins,
+							}),
+						},
+					});
+				}
+				return;
+			}
+
+			const nextEnvOptions = getEnvOptions(actionParams.activityName);
+			if (nextEnvOptions?.subview.initialParams) {
+				actions.overrideActionParams({
+					...actionParams,
+					activityParams: {
+						...actionParams.activityParams,
+						OMNI_childName: nextEnvOptions.subview.initialActivity,
+						OMNI_childParams: serialize(nextEnvOptions.subview.initialParams, {
 							plugins: serovalPlugins,
 						}),
 					},

@@ -126,8 +126,8 @@ export function omniflow<ActivityName extends string>({
 							}),
 						},
 					});
+					return;
 				}
-				return;
 			}
 
 			const nextEnvOptions = getEnvOptions(actionParams.activityName);

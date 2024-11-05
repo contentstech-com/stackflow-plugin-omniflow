@@ -9,7 +9,6 @@ import type {
 } from "@stackflow/config";
 import { id } from "@stackflow/core";
 import { type Plugin as SerovalPlugin, deserialize, serialize } from "seroval";
-import { createMemo } from "solid-js";
 import { Dynamic } from "solid-js/web";
 import { ChildProvider } from "./child.js";
 
@@ -113,7 +112,7 @@ export function omniflow<ActivityName extends string>({
 			if (topActivity) {
 				const topEnvOptions = getEnvOptions(topActivity.name);
 				if (
-					(topEnvOptions?.subview.children as string[]).includes(
+					(topEnvOptions?.subview.children as string[] | undefined)?.includes(
 						actionParams.activityName,
 					)
 				) {

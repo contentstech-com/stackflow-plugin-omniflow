@@ -1,7 +1,7 @@
 {
 	"name": "@contentstech/stackflow-plugin-omniflow",
 	"type": "module",
-	"version": "0.0.6",
+	"version": "0.0.7",
 	"description": "Fine-tune UX of Stackflow apps across multiple environments",
 	"author": "XiNiHa <me@xiniha.dev>",
 	"scripts": {

@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.7
+
+### Patch Changes
+
+- 404fde4: Fix invalid return in onBeforeReplace
+
 ## 0.0.6
 
 ### Patch Changes

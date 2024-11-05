@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.6
+
+### Patch Changes
+
+- 6fe5ef3: Fix more missing optional chainings
+
 ## 0.0.5
 
 ### Patch Changes

@@ -6,11 +6,13 @@ import type {
 	ActivityBaseParams,
 	ActivityDefinition,
 	Config,
+	RegisteredActivityName,
 } from "@stackflow/config";
 import { id } from "@stackflow/core";
 import { type Plugin as SerovalPlugin, deserialize, serialize } from "seroval";
-import { Dynamic } from "solid-js/web";
+import { Dynamic, Show } from "solid-js/web";
 import { ChildProvider } from "./child.js";
+import { ParentProvider } from "./parent.js";
 
 type OmniflowOptions<ActivityName extends string> = {
 	config: Config<ActivityDefinition<ActivityName>>;
@@ -181,7 +183,18 @@ export function omniflow<ActivityName extends string>({
 			return (
 				<ChildProvider
 					value={() => (
-						<Dynamic component={child()} params={childParams() ?? {}} />
+						<Show when={child()}>
+							{(child) => (
+								<ParentProvider
+									value={{
+										activityName: activity.name as RegisteredActivityName,
+										activityParams: activity.params,
+									}}
+								>
+									<Dynamic component={child()} params={childParams() ?? {}} />
+								</ParentProvider>
+							)}
+						</Show>
 					)}
 				>
 					{activity.render()}
@@ -192,3 +205,4 @@ export function omniflow<ActivityName extends string>({
 }
 
 export { useChild } from "./child.js";
+export { useParent } from "./parent.js";

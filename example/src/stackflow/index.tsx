@@ -1,4 +1,8 @@
-import { omniflow, useChild } from "@contentstech/stackflow-plugin-omniflow";
+import {
+	omniflow,
+	useChild,
+	useParent,
+} from "@contentstech/stackflow-plugin-omniflow";
 import { basicRendererPlugin } from "@contentstech/stackflow-plugin-renderer-basic/solid";
 import {
 	type ActivityComponentType,
@@ -68,9 +72,13 @@ const components: Record<
 		);
 	},
 	View: () => {
+		const parent = useParent();
 		return (
 			<div>
 				<h1>View</h1>
+				<Show when={parent}>
+					{(parent) => <p>Parent activity: {parent().activityName}</p>}
+				</Show>
 				<button
 					type="button"
 					class="bg-slate-200 rounded p-2"
@@ -82,9 +90,13 @@ const components: Record<
 		);
 	},
 	View2: () => {
+		const parent = useParent();
 		return (
 			<div>
 				<h1>View2</h1>
+				<Show when={parent}>
+					{(parent) => <p>Parent activity: {parent().activityName}</p>}
+				</Show>
 				<button
 					type="button"
 					class="bg-slate-200 rounded p-2"
@@ -102,7 +114,7 @@ export const { Stack, actions, stepActions } = stackflow({
 	components,
 	plugins: [
 		basicRendererPlugin(),
-		omniflow({ config, components, environment: "mobile" }),
+		omniflow({ config, components, environment: "desktop" }),
 		() => ({
 			key: "wrap-screen",
 			wrapActivity: ({ activity }) => <Screen>{activity.render()}</Screen>,

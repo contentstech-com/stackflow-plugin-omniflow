@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.8
+
+### Patch Changes
+
+- 71e77d9: Add new API: `useParent()`
+
 ## 0.0.7
 
 ### Patch Changes

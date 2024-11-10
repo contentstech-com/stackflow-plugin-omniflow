@@ -34,9 +34,11 @@ export type ActivityOptions<ActivityName extends string> = Record<
 >;
 export type ActivityEnvironmentOptions<ActivityName extends string> = {
 	subview: {
-		initialActivity: ActivityName;
-		initialParams: ActivityBaseParams;
 		children: ActivityName[];
+		initialActivity?: {
+			name: ActivityName;
+			params: ActivityBaseParams;
+		};
 	};
 };
 
@@ -63,10 +65,13 @@ export function omniflow<ActivityName extends string>({
 				const envOptions = getEnvOptions(topActivityEvent.activityName);
 				if (envOptions?.subview.initialActivity) {
 					topActivityEvent.activityParams = {
-						OMNI_childName: envOptions.subview.initialActivity,
-						OMNI_childParams: serialize(envOptions.subview.initialParams, {
-							plugins: serovalPlugins,
-						}),
+						OMNI_childName: envOptions.subview.initialActivity.name,
+						OMNI_childParams: serialize(
+							envOptions.subview.initialActivity.params,
+							{
+								plugins: serovalPlugins,
+							},
+						),
 					};
 				}
 			}
@@ -96,15 +101,18 @@ export function omniflow<ActivityName extends string>({
 			}
 
 			const nextEnvOptions = getEnvOptions(actionParams.activityName);
-			if (nextEnvOptions?.subview.initialParams) {
+			if (nextEnvOptions?.subview.initialActivity) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						OMNI_childName: nextEnvOptions.subview.initialActivity,
-						OMNI_childParams: serialize(nextEnvOptions.subview.initialParams, {
-							plugins: serovalPlugins,
-						}),
+						OMNI_childName: nextEnvOptions.subview.initialActivity.name,
+						OMNI_childParams: serialize(
+							nextEnvOptions.subview.initialActivity.params,
+							{
+								plugins: serovalPlugins,
+							},
+						),
 					},
 				});
 			}
@@ -133,15 +141,18 @@ export function omniflow<ActivityName extends string>({
 			}
 
 			const nextEnvOptions = getEnvOptions(actionParams.activityName);
-			if (nextEnvOptions?.subview.initialParams) {
+			if (nextEnvOptions?.subview.initialActivity) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						OMNI_childName: nextEnvOptions.subview.initialActivity,
-						OMNI_childParams: serialize(nextEnvOptions.subview.initialParams, {
-							plugins: serovalPlugins,
-						}),
+						OMNI_childName: nextEnvOptions.subview.initialActivity.name,
+						OMNI_childParams: serialize(
+							nextEnvOptions.subview.initialActivity.params,
+							{
+								plugins: serovalPlugins,
+							},
+						),
 					},
 				});
 			}

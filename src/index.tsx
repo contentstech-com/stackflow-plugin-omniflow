@@ -161,9 +161,13 @@ export function omniflow<ActivityName extends string>({
 			const topActivity = actions.getStack().activities.find((a) => a.isTop);
 			if (!topActivity) return;
 			const omniChildNames = topActivity.steps
-				.map((s) => s.params.OMNI_childName)
-				.filter((v) => v != null);
-			if (new Set(omniChildNames).size <= 1) return;
+				.filter(
+					(s) =>
+						s.enteredBy.name.startsWith("Step") &&
+						s.params.OMNI_childName != null,
+				)
+				.map((s) => s.params.OMNI_childName);
+			if (new Set(omniChildNames).size === 0) return;
 			actions.preventDefault();
 			const activeChildName = omniChildNames.at(-1);
 			const indexToTarget = topActivity.steps.findLastIndex(

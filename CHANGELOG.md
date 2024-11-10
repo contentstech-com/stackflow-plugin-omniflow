@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.10
+
+### Patch Changes
+
+- 55f6fc7: Fix pop() to handle activities without initial subview
+
 ## 0.0.9
 
 ### Patch Changes

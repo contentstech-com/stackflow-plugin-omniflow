@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.9
+
+### Patch Changes
+
+- 97710fb: Make initialActivity optional
+
 ## 0.0.8
 
 ### Patch Changes

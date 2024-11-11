@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.11
+
+### Patch Changes
+
+- 302b3aa: Support nested subviews
+
 ## 0.0.10
 
 ### Patch Changes

@@ -9,14 +9,14 @@
 	},
 	"dependencies": {
 		"@contentstech/stackflow-plugin-omniflow": "../",
-		"@contentstech/stackflow-plugin-renderer-basic": "^0.5.0",
-		"@contentstech/stackflow-solid": "^0.5.0",
-		"@solidjs/start": "^1.0.9",
+		"@contentstech/stackflow-plugin-renderer-basic": "^0.5.1",
+		"@contentstech/stackflow-solid": "^0.6.0",
+		"@solidjs/start": "^1.0.10",
 		"@stackflow/config": "^1.2.0",
 		"@stackflow/core": "^1.1.0",
-		"@unocss/reset": "^0.63.6",
+		"@unocss/reset": "^0.64.0",
 		"solid-js": "^1.9.2",
-		"unocss": "^0.63.6",
+		"unocss": "^0.64.0",
 		"vinxi": "^0.4.3"
 	},
 	"engines": {

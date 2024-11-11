@@ -1,13 +1,6 @@
-import {
-	type ActivityDefinition,
-	type RegisteredActivityName,
-	defineConfig,
-} from "@stackflow/config";
+import { defineConfig } from "@stackflow/config";
 
-export default defineConfig<
-	RegisteredActivityName,
-	ActivityDefinition<RegisteredActivityName>
->({
+export default defineConfig({
 	transitionDuration: 400,
 	initialActivity: () => "Root",
 	activities: [
@@ -16,14 +9,41 @@ export default defineConfig<
 			omniflow: {
 				desktop: {
 					subview: {
-						initialActivity: "View",
-						initialParams: {},
+						initialActivity: {
+							name: "View",
+							params: {},
+						},
 						children: ["View", "View2"],
 					},
 				},
 			},
 		},
-		{ name: "View" },
-		{ name: "View2" },
+		{
+			name: "View",
+			omniflow: {
+				desktop: {
+					subview: {
+						initialActivity: {
+							name: "View2",
+							params: {},
+						},
+						children: ["View2", "View3"],
+					},
+				},
+			},
+		},
+		{
+			name: "View2",
+			omniflow: {
+				desktop: {
+					subview: {
+						children: ["View3"],
+					},
+				},
+			},
+		},
+		{
+			name: "View3",
+		},
 	],
 });

@@ -11,6 +11,7 @@ import {
 export type Parent = {
 	activityName: RegisteredActivityName;
 	activityParams: ActivityBaseParams;
+	parent: Parent | undefined;
 };
 
 const ParentContext = createContext<Parent>();

@@ -6,20 +6,18 @@ import type {
 	ActivityBaseParams,
 	ActivityDefinition,
 	Config,
-	RegisteredActivityName,
 } from "@stackflow/config";
-import { id } from "@stackflow/core";
-import { type Plugin as SerovalPlugin, deserialize, serialize } from "seroval";
+import { type Activity, id } from "@stackflow/core";
+import type { JSXElement } from "solid-js";
 import { Dynamic, Show } from "solid-js/web";
 import { ChildProvider } from "./child.js";
-import { ParentProvider } from "./parent.js";
+import { ParentProvider, useParent } from "./parent.js";
+import { unwrap } from "solid-js/store";
 
 type OmniflowOptions<ActivityName extends string> = {
 	config: Config<ActivityDefinition<ActivityName>>;
 	components: Record<ActivityName, ActivityComponentType<ActivityName>>;
 	environment: string;
-	// biome-ignore lint/suspicious/noExplicitAny: it works like this
-	serovalPlugins?: SerovalPlugin<any, any>[];
 };
 
 declare module "@stackflow/config" {
@@ -46,7 +44,6 @@ export function omniflow<ActivityName extends string>({
 	config,
 	components,
 	environment,
-	serovalPlugins,
 }: OmniflowOptions<ActivityName>): StackflowSolidPlugin {
 	const getEnvOptions = (activityName: string) => {
 		const activityOptions = config.activities.find(
@@ -55,6 +52,70 @@ export function omniflow<ActivityName extends string>({
 		return activityOptions?.[environment];
 	};
 
+	function getOmniInitialParams(activityName: ActivityName) {
+		function impl(activityName: ActivityName):
+			| {
+					childName: ActivityName[];
+					childParams: ActivityBaseParams[];
+			  }
+			| undefined {
+			const envOptions = getEnvOptions(activityName);
+			if (envOptions?.subview.initialActivity) {
+				const { childName, childParams } =
+					impl(envOptions.subview.initialActivity.name) ?? {};
+				return {
+					childName: [
+						envOptions.subview.initialActivity.name,
+						...(childName ?? []),
+					],
+					childParams: [
+						envOptions.subview.initialActivity.params,
+						...(childParams ?? []),
+					],
+				};
+			}
+		}
+
+		const result = impl(activityName);
+		return {
+			OMNI_childName: JSON.stringify(result?.childName),
+			OMNI_childParams: JSON.stringify(result?.childParams),
+		};
+	}
+
+	function getOmniStepParams(
+		topActivity: Activity,
+		newActivityName: ActivityName,
+		newActivityParams: ActivityBaseParams,
+	) {
+		const childNameStack = topActivity.params.OMNI_childName
+			? (JSON.parse(topActivity.params.OMNI_childName) as ActivityName[])
+			: [];
+		const childParamsStack = topActivity.params.OMNI_childParams
+			? (JSON.parse(
+					topActivity.params.OMNI_childParams,
+				) as ActivityBaseParams[])
+			: [];
+		const iterStack = [topActivity.name as ActivityName, ...childNameStack];
+
+		for (let i = iterStack.length - 1; i >= 0; i--) {
+			const activityName = iterStack[i];
+			const envOptions = getEnvOptions(activityName);
+			if (envOptions?.subview.children?.includes(newActivityName)) {
+				return {
+					OMNI_childName: JSON.stringify([
+						...childNameStack.slice(0, i),
+						newActivityName,
+					]),
+					OMNI_childParams: JSON.stringify([
+						...childParamsStack.slice(0, i),
+						newActivityParams,
+					]),
+				};
+			}
+		}
+	}
+
 	return () => ({
 		key: "plugin-omniflow",
 		overrideInitialEvents({ initialEvents }) {
@@ -62,17 +123,11 @@ export function omniflow<ActivityName extends string>({
 				(e) => e.name === "Pushed",
 			);
 			if (topActivityEvent) {
-				const envOptions = getEnvOptions(topActivityEvent.activityName);
-				if (envOptions?.subview.initialActivity) {
-					topActivityEvent.activityParams = {
-						OMNI_childName: envOptions.subview.initialActivity.name,
-						OMNI_childParams: serialize(
-							envOptions.subview.initialActivity.params,
-							{
-								plugins: serovalPlugins,
-							},
-						),
-					};
+				const omniParams = getOmniInitialParams(
+					topActivityEvent.activityName as ActivityName,
+				);
+				if (omniParams) {
+					topActivityEvent.activityParams = omniParams;
 				}
 			}
 			return initialEvents;
@@ -80,39 +135,27 @@ export function omniflow<ActivityName extends string>({
 		onBeforePush({ actions, actionParams }) {
 			const topActivity = actions.getStack().activities.find((a) => a.isTop);
 			if (topActivity) {
-				const topEnvOptions = getEnvOptions(topActivity.name);
-				if (
-					(topEnvOptions?.subview.children as string[] | undefined)?.includes(
-						actionParams.activityName,
-					)
-				) {
+				const stepParams = getOmniStepParams(
+					topActivity,
+					actionParams.activityName as ActivityName,
+					actionParams.activityParams,
+				);
+				if (stepParams) {
 					actions.preventDefault();
-					actions.stepPush({
-						stepId: id(),
-						stepParams: {
-							OMNI_childName: actionParams.activityName,
-							OMNI_childParams: serialize(actionParams.activityParams, {
-								plugins: serovalPlugins,
-							}),
-						},
-					});
+					actions.stepPush({ stepId: id(), stepParams });
 					return;
 				}
 			}
 
-			const nextEnvOptions = getEnvOptions(actionParams.activityName);
-			if (nextEnvOptions?.subview.initialActivity) {
+			const initialParams = getOmniInitialParams(
+				actionParams.activityName as ActivityName,
+			);
+			if (initialParams) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						OMNI_childName: nextEnvOptions.subview.initialActivity.name,
-						OMNI_childParams: serialize(
-							nextEnvOptions.subview.initialActivity.params,
-							{
-								plugins: serovalPlugins,
-							},
-						),
+						...initialParams,
 					},
 				});
 			}
@@ -120,39 +163,27 @@ export function omniflow<ActivityName extends string>({
 		onBeforeReplace({ actions, actionParams }) {
 			const topActivity = actions.getStack().activities.find((a) => a.isTop);
 			if (topActivity) {
-				const topEnvOptions = getEnvOptions(topActivity.name);
-				if (
-					(topEnvOptions?.subview.children as string[] | undefined)?.includes(
-						actionParams.activityName,
-					)
-				) {
+				const stepParams = getOmniStepParams(
+					topActivity,
+					actionParams.activityName as ActivityName,
+					actionParams.activityParams,
+				);
+				if (stepParams) {
 					actions.preventDefault();
-					actions.stepReplace({
-						stepId: id(),
-						stepParams: {
-							OMNI_childName: actionParams.activityName,
-							OMNI_childParams: serialize(actionParams.activityParams, {
-								plugins: serovalPlugins,
-							}),
-						},
-					});
+					actions.stepReplace({ stepId: id(), stepParams });
 					return;
 				}
 			}
 
-			const nextEnvOptions = getEnvOptions(actionParams.activityName);
-			if (nextEnvOptions?.subview.initialActivity) {
+			const omniParams = getOmniInitialParams(
+				actionParams.activityName as ActivityName,
+			);
+			if (omniParams) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						OMNI_childName: nextEnvOptions.subview.initialActivity.name,
-						OMNI_childParams: serialize(
-							nextEnvOptions.subview.initialActivity.params,
-							{
-								plugins: serovalPlugins,
-							},
-						),
+						...omniParams,
 					},
 				});
 			}
@@ -164,10 +195,11 @@ export function omniflow<ActivityName extends string>({
 				.filter(
 					(s) =>
 						s.enteredBy.name.startsWith("Step") &&
-						s.params.OMNI_childName != null,
+						s.params.OMNI_childName != null &&
+						(JSON.parse(s.params.OMNI_childName) as ActivityName[]).length > 0,
 				)
 				.map((s) => s.params.OMNI_childName);
-			if (new Set(omniChildNames).size === 0) return;
+			if (omniChildNames.length === 0) return;
 			actions.preventDefault();
 			const activeChildName = omniChildNames.at(-1);
 			const indexToTarget = topActivity.steps.findLastIndex(
@@ -181,39 +213,78 @@ export function omniflow<ActivityName extends string>({
 			}
 		},
 		wrapActivity({ activity }) {
-			const envOptions = getEnvOptions(activity.name);
-			if (!envOptions || envOptions.subview.children.length === 0) {
-				return activity.render();
+			function Wrapped(props: {
+				parentName: ActivityName;
+				parentParams: ActivityBaseParams;
+				childNameStack: ActivityName[];
+				childParamsStack: ActivityBaseParams[];
+				children: JSXElement;
+			}) {
+				const envOptions = getEnvOptions(props.parentName);
+				if (!envOptions || envOptions.subview.children.length === 0) {
+					return (
+						<ChildProvider value={undefined}>{props.children}</ChildProvider>
+					);
+				}
+
+				const child = () =>
+					components[props.childNameStack[0]] as
+						| ActivityComponentType<ActivityName>
+						| undefined;
+				const childParams = () => props.childParamsStack[0];
+
+				return (
+					<ChildProvider
+						value={() => (
+							<Show when={child()}>
+								{(child) => (
+									<ParentProvider
+										value={{
+											activityName: props.parentName,
+											activityParams: props.parentParams,
+											parent: useParent(),
+										}}
+									>
+										<Wrapped
+											parentName={props.childNameStack[0]}
+											parentParams={childParams() ?? {}}
+											childNameStack={props.childNameStack.slice(1)}
+											childParamsStack={props.childParamsStack.slice(1)}
+										>
+											<Dynamic
+												component={child()}
+												params={childParams() ?? {}}
+											/>
+										</Wrapped>
+									</ParentProvider>
+								)}
+							</Show>
+						)}
+					>
+						{props.children}
+					</ChildProvider>
+				);
 			}
 
-			const child = () =>
-				components[activity.params.OMNI_childName as ActivityName] as
-					| ActivityComponentType<ActivityName>
-					| undefined;
-			const childParams = () => {
-				const v = activity.params.OMNI_childParams;
-				return v != null ? deserialize<ActivityBaseParams>(v) : undefined;
-			};
-
 			return (
-				<ChildProvider
-					value={() => (
-						<Show when={child()}>
-							{(child) => (
-								<ParentProvider
-									value={{
-										activityName: activity.name as RegisteredActivityName,
-										activityParams: activity.params,
-									}}
-								>
-									<Dynamic component={child()} params={childParams() ?? {}} />
-								</ParentProvider>
-							)}
-						</Show>
-					)}
+				<Wrapped
+					parentName={activity.name as ActivityName}
+					parentParams={activity.params}
+					childNameStack={
+						activity.params.OMNI_childName
+							? (JSON.parse(activity.params.OMNI_childName) as ActivityName[])
+							: []
+					}
+					childParamsStack={
+						activity.params.OMNI_childParams
+							? (JSON.parse(
+									activity.params.OMNI_childParams,
+								) as ActivityBaseParams[])
+							: []
+					}
 				>
 					{activity.render()}
-				</ChildProvider>
+				</Wrapped>
 			);
 		},
 	});

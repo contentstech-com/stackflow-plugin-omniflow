@@ -51,35 +51,27 @@ export function omniflow<ActivityName extends string>({
 		return activityOptions?.[environment];
 	};
 
-	function getOmniInitialParams(activityName: ActivityName) {
-		function impl(activityName: ActivityName):
-			| {
-					childName: ActivityName[];
-					childParams: ActivityBaseParams[];
-			  }
-			| undefined {
-			const envOptions = getEnvOptions(activityName);
-			if (envOptions?.subview.initialActivity) {
-				const { childName, childParams } =
-					impl(envOptions.subview.initialActivity.name) ?? {};
-				return {
-					childName: [
-						envOptions.subview.initialActivity.name,
-						...(childName ?? []),
-					],
-					childParams: [
-						envOptions.subview.initialActivity.params,
-						...(childParams ?? []),
-					],
-				};
-			}
+	function getOmniInitialParams(activityName: ActivityName):
+		| {
+				childName: ActivityName[];
+				childParams: ActivityBaseParams[];
+		  }
+		| undefined {
+		const envOptions = getEnvOptions(activityName);
+		if (envOptions?.subview.initialActivity) {
+			const { childName, childParams } =
+				getOmniInitialParams(envOptions.subview.initialActivity.name) ?? {};
+			return {
+				childName: [
+					envOptions.subview.initialActivity.name,
+					...(childName ?? []),
+				],
+				childParams: [
+					envOptions.subview.initialActivity.params,
+					...(childParams ?? []),
+				],
+			};
 		}
-
-		const result = impl(activityName);
-		return {
-			OMNI_childName: JSON.stringify(result?.childName),
-			OMNI_childParams: JSON.stringify(result?.childParams),
-		};
 	}
 
 	function getOmniStepParams(
@@ -101,14 +93,18 @@ export function omniflow<ActivityName extends string>({
 			const activityName = iterStack[i];
 			const envOptions = getEnvOptions(activityName);
 			if (envOptions?.subview.children?.includes(newActivityName)) {
+				const newInitialParams = getOmniInitialParams(newActivityName);
+
 				return {
 					OMNI_childName: JSON.stringify([
 						...childNameStack.slice(0, i),
 						newActivityName,
+						...(newInitialParams?.childName ?? []),
 					]),
 					OMNI_childParams: JSON.stringify([
 						...childParamsStack.slice(0, i),
 						newActivityParams,
+						...(newInitialParams?.childParams ?? []),
 					]),
 				};
 			}
@@ -122,11 +118,14 @@ export function omniflow<ActivityName extends string>({
 				(e) => e.name === "Pushed",
 			);
 			if (topActivityEvent) {
-				const omniParams = getOmniInitialParams(
+				const initialParams = getOmniInitialParams(
 					topActivityEvent.activityName as ActivityName,
 				);
-				if (omniParams) {
-					topActivityEvent.activityParams = omniParams;
+				if (initialParams) {
+					topActivityEvent.activityParams = {
+						OMNI_childName: JSON.stringify(initialParams.childName),
+						OMNI_childParams: JSON.stringify(initialParams.childParams),
+					};
 				}
 			}
 			return initialEvents;
@@ -154,7 +153,8 @@ export function omniflow<ActivityName extends string>({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						...initialParams,
+						OMNI_childName: JSON.stringify(initialParams.childName),
+						OMNI_childParams: JSON.stringify(initialParams.childParams),
 					},
 				});
 			}
@@ -174,15 +174,16 @@ export function omniflow<ActivityName extends string>({
 				}
 			}
 
-			const omniParams = getOmniInitialParams(
+			const initialParams = getOmniInitialParams(
 				actionParams.activityName as ActivityName,
 			);
-			if (omniParams) {
+			if (initialParams) {
 				actions.overrideActionParams({
 					...actionParams,
 					activityParams: {
 						...actionParams.activityParams,
-						...omniParams,
+						OMNI_childName: JSON.stringify(initialParams.childName),
+						OMNI_childParams: JSON.stringify(initialParams.childParams),
 					},
 				});
 			}

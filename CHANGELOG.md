@@ -1,5 +1,12 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.12
+
+### Patch Changes
+
+- 70a3bb0: Fix initial subview not applied on subview push
+- 5975854: Add activity name to child
+
 ## 0.0.11
 
 ### Patch Changes

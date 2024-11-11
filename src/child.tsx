@@ -5,11 +5,15 @@ import {
 	useContext,
 } from "solid-js";
 
-const ChildContext = createContext<() => JSXElement>();
+export type Child = {
+	name: string;
+	render: () => JSXElement;
+};
 
-export const ChildProvider: ContextProviderComponent<
-	(() => JSXElement) | undefined
-> = ChildContext.Provider;
+const ChildContext = createContext<Child | null>();
 
-export const useChild = (): (() => JSXElement) | undefined =>
+export const ChildProvider: ContextProviderComponent<Child | null | undefined> =
+	ChildContext.Provider;
+
+export const useChild = (): Child | null | undefined =>
 	useContext(ChildContext);

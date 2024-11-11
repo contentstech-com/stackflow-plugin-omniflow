@@ -74,10 +74,10 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 					>
 						Push Root
 					</button>
-					<Show when={child}>
+					<Show when={child !== undefined}>
 						<div class="border rounded p-2">
-							<p>Child will be rendered here</p>
-							<div class="border border-red p-2 rounded">{child?.()}</div>
+							<p>Child ({child?.name}) will be rendered here</p>
+							<div class="border border-red p-2 rounded">{child?.render()}</div>
 						</div>
 					</Show>
 				</div>
@@ -101,10 +101,10 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 						</p>
 					)}
 				</Show>
-				<Show when={child}>
+				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.()}</div>
+						<p>Child ({child?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.render()}</div>
 					</div>
 				</Show>
 				<button
@@ -131,10 +131,10 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 						</p>
 					)}
 				</Show>
-				<Show when={child}>
+				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.()}</div>
+						<p>Child ({child?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.render()}</div>
 					</div>
 				</Show>
 				<button
@@ -161,10 +161,10 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 						</p>
 					)}
 				</Show>
-				<Show when={child}>
+				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.()}</div>
+						<p>Child ({child?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.render()}</div>
 					</div>
 				</Show>
 				<button

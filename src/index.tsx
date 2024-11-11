@@ -235,31 +235,38 @@ export function omniflow<ActivityName extends string>({
 
 				return (
 					<ChildProvider
-						value={() => (
-							<Show when={child()}>
-								{(child) => (
-									<ParentProvider
-										value={{
-											activityName: props.parentName,
-											activityParams: props.parentParams,
-											parent: useParent(),
-										}}
-									>
-										<Wrapped
-											parentName={props.childNameStack[0]}
-											parentParams={childParams() ?? {}}
-											childNameStack={props.childNameStack.slice(1)}
-											childParamsStack={props.childParamsStack.slice(1)}
-										>
-											<Dynamic
-												component={child()}
-												params={childParams() ?? {}}
-											/>
-										</Wrapped>
-									</ParentProvider>
-								)}
-							</Show>
-						)}
+						value={
+							props.childNameStack[0] != null
+								? {
+										name: props.childNameStack[0],
+										render: () => (
+											<Show when={child()}>
+												{(child) => (
+													<ParentProvider
+														value={{
+															activityName: props.parentName,
+															activityParams: props.parentParams,
+															parent: useParent(),
+														}}
+													>
+														<Wrapped
+															parentName={props.childNameStack[0]}
+															parentParams={childParams() ?? {}}
+															childNameStack={props.childNameStack.slice(1)}
+															childParamsStack={props.childParamsStack.slice(1)}
+														>
+															<Dynamic
+																component={child()}
+																params={childParams() ?? {}}
+															/>
+														</Wrapped>
+													</ParentProvider>
+												)}
+											</Show>
+										),
+									}
+								: null
+						}
 					>
 						{props.children}
 					</ChildProvider>

@@ -1,5 +1,12 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.13
+
+### Patch Changes
+
+- 4f8d33b: Fix not externalizing peerDeps
+- 155ffa4: Make child reactive
+
 ## 0.0.12
 
 ### Patch Changes

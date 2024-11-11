@@ -11,7 +11,6 @@ import {
 } from "@contentstech/stackflow-solid/future";
 import type { RegisteredActivityName } from "@stackflow/config";
 import { type JSXElement, Show } from "solid-js";
-import { unwrap } from "solid-js/store";
 import config from "./config";
 
 declare module "@stackflow/config" {
@@ -76,13 +75,13 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 					</button>
 					<Show when={child !== undefined}>
 						<div class="border rounded p-2">
-							<p>Child ({child?.name}) will be rendered here</p>
-							<div class="border border-red p-2 rounded">{child?.render()}</div>
+							<p>Child ({child?.()?.name}) will be rendered here</p>
+							<div class="border border-red p-2 rounded">{child?.()?.render()}</div>
 						</div>
 					</Show>
 				</div>
 				<div class="min-h-0 h-full overflow-auto flex-1">
-					<pre>{JSON.stringify(unwrap(stack().activities), null, 2)}</pre>
+					<pre>{JSON.stringify(stack().activities, null, 2)}</pre>
 				</div>
 			</div>
 		);
@@ -103,8 +102,8 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 				</Show>
 				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child ({child?.name}) will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.render()}</div>
+						<p>Child ({child?.()?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.()?.render()}</div>
 					</div>
 				</Show>
 				<button
@@ -133,8 +132,8 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 				</Show>
 				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child ({child?.name}) will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.render()}</div>
+						<p>Child ({child?.()?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.()?.render()}</div>
 					</div>
 				</Show>
 				<button
@@ -163,8 +162,8 @@ const components: Record<RegisteredActivityName, ActivityComponentType<any>> = {
 				</Show>
 				<Show when={child !== undefined}>
 					<div class="border rounded p-2">
-						<p>Child ({child?.name}) will be rendered here</p>
-						<div class="border border-red p-2 rounded">{child?.render()}</div>
+						<p>Child ({child?.()?.name}) will be rendered here</p>
+						<div class="border border-red p-2 rounded">{child?.()?.render()}</div>
 					</div>
 				</Show>
 				<button

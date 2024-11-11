@@ -8,7 +8,7 @@ import type {
 	Config,
 } from "@stackflow/config";
 import { type Activity, id } from "@stackflow/core";
-import type { JSXElement } from "solid-js";
+import { createMemo, type JSXElement } from "solid-js";
 import { Dynamic, Show } from "solid-js/web";
 import { ChildProvider } from "./child.js";
 import { ParentProvider, useParent } from "./parent.js";
@@ -227,68 +227,69 @@ export function omniflow<ActivityName extends string>({
 					);
 				}
 
-				const child = () =>
-					components[props.childNameStack[0]] as
-						| ActivityComponentType<ActivityName>
-						| undefined;
-				const childParams = () => props.childParamsStack[0];
+				const childName = createMemo(() => props.childNameStack[0]);
+				const childComponent = createMemo(
+					() =>
+						components[childName()] as
+							| ActivityComponentType<ActivityName>
+							| undefined,
+				);
+				const childParams = createMemo(() => props.childParamsStack[0]);
+				const childValue = createMemo(() => {
+					const name = childName();
+					if (name == null) return null;
+					return {
+						name,
+						render: () => (
+							<Show when={childComponent()}>
+								{(child) => (
+									<ParentProvider
+										value={{
+											activityName: props.parentName,
+											activityParams: props.parentParams,
+											parent: useParent(),
+										}}
+									>
+										<Wrapped
+											parentName={childName()}
+											parentParams={childParams() ?? {}}
+											childNameStack={props.childNameStack.slice(1)}
+											childParamsStack={props.childParamsStack.slice(1)}
+										>
+											<Dynamic
+												component={child()}
+												params={childParams() ?? {}}
+											/>
+										</Wrapped>
+									</ParentProvider>
+								)}
+							</Show>
+						),
+					};
+				});
 
 				return (
-					<ChildProvider
-						value={
-							props.childNameStack[0] != null
-								? {
-										name: props.childNameStack[0],
-										render: () => (
-											<Show when={child()}>
-												{(child) => (
-													<ParentProvider
-														value={{
-															activityName: props.parentName,
-															activityParams: props.parentParams,
-															parent: useParent(),
-														}}
-													>
-														<Wrapped
-															parentName={props.childNameStack[0]}
-															parentParams={childParams() ?? {}}
-															childNameStack={props.childNameStack.slice(1)}
-															childParamsStack={props.childParamsStack.slice(1)}
-														>
-															<Dynamic
-																component={child()}
-																params={childParams() ?? {}}
-															/>
-														</Wrapped>
-													</ParentProvider>
-												)}
-											</Show>
-										),
-									}
-								: null
-						}
-					>
-						{props.children}
-					</ChildProvider>
+					<ChildProvider value={childValue}>{props.children}</ChildProvider>
 				);
 			}
+
+			const childName = createMemo(() => activity.params.OMNI_childName);
+			const childNameStack = createMemo(() => {
+				const name = childName();
+				return name ? (JSON.parse(name) as ActivityName[]) : [];
+			});
+			const childParams = createMemo(() => activity.params.OMNI_childParams);
+			const childParamsStack = createMemo(() => {
+				const params = childParams();
+				return params ? (JSON.parse(params) as ActivityBaseParams[]) : [];
+			});
 
 			return (
 				<Wrapped
 					parentName={activity.name as ActivityName}
 					parentParams={activity.params}
-					childNameStack={
-						activity.params.OMNI_childName
-							? (JSON.parse(activity.params.OMNI_childName) as ActivityName[])
-							: []
-					}
-					childParamsStack={
-						activity.params.OMNI_childParams
-							? (JSON.parse(
-									activity.params.OMNI_childParams,
-								) as ActivityBaseParams[])
-							: []
-					}
+					childNameStack={childNameStack()}
+					childParamsStack={childParamsStack()}
 				>
 					{activity.render()}
 				</Wrapped>

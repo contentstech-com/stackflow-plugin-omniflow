@@ -10,10 +10,11 @@ export type Child = {
 	render: () => JSXElement;
 };
 
-const ChildContext = createContext<Child | null>();
+const ChildContext = createContext<() => Child | null>();
 
-export const ChildProvider: ContextProviderComponent<Child | null | undefined> =
-	ChildContext.Provider;
+export const ChildProvider: ContextProviderComponent<
+	(() => Child | null) | undefined
+> = ChildContext.Provider;
 
-export const useChild = (): Child | null | undefined =>
+export const useChild = (): (() => Child | null) | undefined =>
 	useContext(ChildContext);

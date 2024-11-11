@@ -7,4 +7,5 @@ build({
 	outdir: "dist",
 	format: "esm",
 	plugins: [solidPlugin()],
+	external: ["solid-js", "@*"]
 }).catch(() => process.exit(1));

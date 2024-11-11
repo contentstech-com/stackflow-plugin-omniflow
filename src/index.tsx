@@ -12,7 +12,6 @@ import type { JSXElement } from "solid-js";
 import { Dynamic, Show } from "solid-js/web";
 import { ChildProvider } from "./child.js";
 import { ParentProvider, useParent } from "./parent.js";
-import { unwrap } from "solid-js/store";
 
 type OmniflowOptions<ActivityName extends string> = {
 	config: Config<ActivityDefinition<ActivityName>>;

@@ -1,5 +1,11 @@
 # @contentstech/stackflow-plugin-omniflow
 
+## 0.0.14
+
+### Patch Changes
+
+- eeafd8f: Don't override omniflow params when initializing if there's already one
+
 ## 0.0.13
 
 ### Patch Changes

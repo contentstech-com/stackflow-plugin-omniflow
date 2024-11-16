@@ -121,7 +121,10 @@ export function omniflow<ActivityName extends string>({
 				const initialParams = getOmniInitialParams(
 					topActivityEvent.activityName as ActivityName,
 				);
-				if (initialParams) {
+				if (
+					initialParams &&
+					topActivityEvent.activityParams.OMNI_childName == null
+				) {
 					topActivityEvent.activityParams = {
 						OMNI_childName: JSON.stringify(initialParams.childName),
 						OMNI_childParams: JSON.stringify(initialParams.childParams),
